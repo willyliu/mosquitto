@@ -22,6 +22,7 @@ Contributors:
 #include <syslog.h>
 #endif
 #include <time.h>
+#include <sys/time.h>
 
 #ifdef WITH_DLT
 #include <dlt/dlt.h>
