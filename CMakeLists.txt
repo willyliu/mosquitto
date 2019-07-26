@@ -74,7 +74,7 @@ else (WITH_THREADING)
 	set (PTHREAD_INCLUDE_DIR "")
 endif (WITH_THREADING)
 
-option(DOCUMENTATION "Build documentation?" ON)
+option(DOCUMENTATION "Build documentation?" OFF)
 
 option(WITH_DLT "Include DLT support?" OFF)
 message(STATUS "WITH_DLT = ${WITH_DLT}")
@@ -90,8 +90,8 @@ endif (WITH_DLT)
 # ========================================
 
 add_subdirectory(lib)
-add_subdirectory(client)
-add_subdirectory(src)
+#add_subdirectory(client)
+#add_subdirectory(src)
 if (DOCUMENTATION)
 	add_subdirectory(man)
 endif (DOCUMENTATION)
