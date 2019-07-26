@@ -16,6 +16,7 @@ c/*.test
 cpp/*.test
 
 build/
+build_*/
 
 client/mosquitto_pub
 client/mosquitto_rr
@@ -74,3 +75,9 @@ test/unit/out/
 
 www/cache/
 __pycache__
+
+.vscode/
+
+CMakeFiles/
+output/
+**/cmake_install.cmake
