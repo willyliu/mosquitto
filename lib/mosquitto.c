@@ -206,13 +206,15 @@ void mosquitto__destroy(struct mosquitto *mosq)
 	if(!mosq) return;
 
 #ifdef WITH_THREADING
-#  ifdef HAVE_PTHREAD_CANCEL
 	if(mosq->threaded == mosq_ts_self && !pthread_equal(mosq->thread_id, pthread_self())){
+#ifdef ANDROID
+		pthread_kill(mosq->thread_id, SIGUSR1);
+#else
 		pthread_cancel(mosq->thread_id);
+#endif
 		pthread_join(mosq->thread_id, NULL);
 		mosq->threaded = mosq_ts_none;
 	}
-#  endif
 
 	if(mosq->id){
 		/* If mosq->id is not NULL then the client has already been initialised
