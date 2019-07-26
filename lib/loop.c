@@ -148,6 +148,35 @@ int mosquitto_loop(struct mosquitto *mosq, int timeout, int max_packets)
 		if(mosq->sock != INVALID_SOCKET){
 			if(FD_ISSET(mosq->sock, &readfds)){
 				rc = mosquitto_loop_read(mosq, max_packets);
+				// sleep some time on tight retry
+				// if retry doesn't work, then return connection lost error
+				static int read_error_count = 0;
+				static int sleep_count = 0;
+				if(errno == EAGAIN || errno == COMPAT_EWOULDBLOCK) {
+					read_error_count++;
+				}
+				else if (!rc) {
+					read_error_count = 0;
+					sleep_count = 0;
+				}
+				const int READ_ERROR_LIMIT = 10000;
+				if (read_error_count > READ_ERROR_LIMIT) {
+					read_error_count = 0;
+					sleep_count++;
+					struct timespec req, rem;
+					req.tv_sec = 0;
+					req.tv_nsec = 100000000;	// equals 0.1 seconds
+					while(nanosleep(&req, &rem) == -1 && errno == EINTR){
+						req = rem;
+					}
+				}
+				const int SLEEP_LIMIT = 50;	// 0.1 seconds * 50 = 5 secs
+				if (sleep_count > SLEEP_LIMIT) {
+					read_error_count = 0;
+					sleep_count = 0;
+					return MOSQ_ERR_CONN_LOST;
+				}
+
 				if(rc || mosq->sock == INVALID_SOCKET){
 					return rc;
 				}
