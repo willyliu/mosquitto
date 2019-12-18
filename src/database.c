@@ -893,6 +893,7 @@ int db__message_release_incoming(struct mosquitto_db *db, struct mosquitto *cont
 	char *source_id;
 	int msg_index = 0;
 	bool deleted = false;
+	int rc;
 
 	if(!context) return MOSQ_ERR_INVAL;
 
@@ -910,11 +911,17 @@ int db__message_release_incoming(struct mosquitto_db *db, struct mosquitto *cont
 			 * denied/dropped and is being processed so the client doesn't
 			 * keep resending it. That means we don't send it to other
 			 * clients. */
-			if(!topic || !sub__messages_queue(db, source_id, topic, 2, retain, &tail->store)){
+			if(!topic){
 				db__message_remove(db, &context->msgs_in, tail);
 				deleted = true;
 			}else{
-				return 1;
+				rc = sub__messages_queue(db, source_id, topic, 2, retain, &tail->store);
+				if(rc == MOSQ_ERR_SUCCESS || rc == MOSQ_ERR_NO_SUBSCRIBERS){
+					db__message_remove(db, &context->msgs_in, tail);
+					deleted = true;
+				}else{
+					return 1;
+				}
 			}
 		}
 	}
@@ -936,7 +943,7 @@ int db__message_release_incoming(struct mosquitto_db *db, struct mosquitto *cont
 	if(deleted){
 		return MOSQ_ERR_SUCCESS;
 	}else{
-		return 1;
+		return MOSQ_ERR_NOT_FOUND;
 	}
 }
 
@@ -957,11 +964,11 @@ int db__message_write(struct mosquitto_db *db, struct mosquitto *context)
 	uint32_t expiry_interval;
 
 	if(!context || context->sock == INVALID_SOCKET
-			|| (context->state == mosq_cs_connected && !context->id)){
+			|| (context->state == mosq_cs_active && !context->id)){
 		return MOSQ_ERR_INVAL;
 	}
 
-	if(context->state != mosq_cs_connected){
+	if(context->state != mosq_cs_active){
 		return MOSQ_ERR_SUCCESS;
 	}
 

@@ -12,7 +12,8 @@ RUN apk --no-cache add \
       util-linux-dev \
       libwebsockets-dev \
       libxslt \
-      python2
+      python2 \
+      ca-certificates
 
 # This build procedure is based on:
 # https://github.com/alpinelinux/aports/blob/master/main/mosquitto/APKBUILD
@@ -46,6 +47,7 @@ LABEL maintainer="Jonathan Hanson <jonathan@jonathan-hanson.org>" \
 # Install the run-time dependencies
 RUN apk --no-cache add \
       busybox \
+      ca-certificates \
       libcrypto1.0 \
       libssl1.0 \
       libuuid \
@@ -66,5 +68,6 @@ VOLUME ["/mosquitto/config", "/mosquitto/data", "/mosquitto/log"]
 
 # Set up the entry point script and default command
 COPY docker-entrypoint.sh /
+EXPOSE 1883
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]

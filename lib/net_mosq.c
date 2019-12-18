@@ -210,7 +210,7 @@ int net__socket_close(struct mosquitto *mosq)
 	if(mosq->wsi)
 	{
 		if(mosq->state != mosq_cs_disconnecting){
-			context__set_state(mosq, mosq_cs_disconnect_ws);
+			mosquitto__set_state(mosq, mosq_cs_disconnect_ws);
 		}
 		libwebsocket_callback_on_writable(mosq->ws_context, mosq->wsi);
 	}else
@@ -607,12 +607,14 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 			if(!engine){
 				log__printf(mosq, MOSQ_LOG_ERR, "Error loading %s engine\n", mosq->tls_engine);
 				COMPAT_CLOSE(mosq->sock);
+				mosq->sock = INVALID_SOCKET;
 				return MOSQ_ERR_TLS;
 			}
 			if(!ENGINE_init(engine)){
 				log__printf(mosq, MOSQ_LOG_ERR, "Failed engine initialisation\n");
 				ENGINE_free(engine);
 				COMPAT_CLOSE(mosq->sock);
+				mosq->sock = INVALID_SOCKET;
 				return MOSQ_ERR_TLS;
 			}
 			ENGINE_set_default(engine, ENGINE_METHOD_ALL);
@@ -698,6 +700,7 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 							log__printf(mosq, MOSQ_LOG_ERR, "Error: Unable to set engine secret mode sha1");
 							ENGINE_FINISH(engine);
 							COMPAT_CLOSE(mosq->sock);
+							mosq->sock = INVALID_SOCKET;
 							net__print_ssl_error(mosq);
 							return MOSQ_ERR_TLS;
 						}
@@ -705,6 +708,7 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 							log__printf(mosq, MOSQ_LOG_ERR, "Error: Unable to set engine pin");
 							ENGINE_FINISH(engine);
 							COMPAT_CLOSE(mosq->sock);
+							mosq->sock = INVALID_SOCKET;
 							net__print_ssl_error(mosq);
 							return MOSQ_ERR_TLS;
 						}
@@ -715,6 +719,7 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 						log__printf(mosq, MOSQ_LOG_ERR, "Error: Unable to load engine private key file \"%s\".", mosq->tls_keyfile);
 						ENGINE_FINISH(engine);
 						COMPAT_CLOSE(mosq->sock);
+						mosq->sock = INVALID_SOCKET;
 						net__print_ssl_error(mosq);
 						return MOSQ_ERR_TLS;
 					}
@@ -722,6 +727,7 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 						log__printf(mosq, MOSQ_LOG_ERR, "Error: Unable to use engine private key file \"%s\".", mosq->tls_keyfile);
 						ENGINE_FINISH(engine);
 						COMPAT_CLOSE(mosq->sock);
+						mosq->sock = INVALID_SOCKET;
 						net__print_ssl_error(mosq);
 						return MOSQ_ERR_TLS;
 					}
@@ -850,7 +856,6 @@ ssize_t net__read(struct mosquitto *mosq, void *buf, size_t count)
 	errno = 0;
 #ifdef WITH_TLS
 	if(mosq->ssl){
-		ERR_clear_error();
 		ret = SSL_read(mosq->ssl, buf, count);
 		if(ret <= 0){
 			err = SSL_get_error(mosq->ssl, ret);
@@ -865,6 +870,7 @@ ssize_t net__read(struct mosquitto *mosq, void *buf, size_t count)
 				net__print_ssl_error(mosq);
 				errno = EPROTO;
 			}
+			ERR_clear_error();
 #ifdef WIN32
 			WSASetLastError(errno);
 #endif
@@ -898,7 +904,6 @@ ssize_t net__write(struct mosquitto *mosq, void *buf, size_t count)
 #ifdef WITH_TLS
 	if(mosq->ssl){
 		mosq->want_write = false;
-		ERR_clear_error();
 		ret = SSL_write(mosq->ssl, buf, count);
 		if(ret < 0){
 			err = SSL_get_error(mosq->ssl, ret);
@@ -913,6 +918,7 @@ ssize_t net__write(struct mosquitto *mosq, void *buf, size_t count)
 				net__print_ssl_error(mosq);
 				errno = EPROTO;
 			}
+			ERR_clear_error();
 #ifdef WIN32
 			WSASetLastError(errno);
 #endif
@@ -948,12 +954,14 @@ int net__socket_nonblock(mosq_sock_t *sock)
 	if(fcntl(*sock, F_SETFL, opt | O_NONBLOCK) == -1){
 		/* If either fcntl fails, don't want to allow this client to connect. */
 		COMPAT_CLOSE(*sock);
+		*sock = INVALID_SOCKET;
 		return MOSQ_ERR_ERRNO;
 	}
 #else
 	unsigned long opt = 1;
 	if(ioctlsocket(*sock, FIONBIO, &opt)){
 		COMPAT_CLOSE(*sock);
+		*sock = INVALID_SOCKET;
 		return MOSQ_ERR_ERRNO;
 	}
 #endif

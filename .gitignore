@@ -63,6 +63,8 @@ test/broker/c/auth_plugin.so
 test/broker/c/*.test
 
 test/ssl/*.csr
+test/ssl/rootCA/
+test/ssl/signingCA/
 
 test/lib/c/*.test
 test/lib/cpp/*.test

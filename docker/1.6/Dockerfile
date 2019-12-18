@@ -3,8 +3,8 @@ FROM alpine:3.8
 LABEL maintainer="Roger Light <roger@atchoo.org>" \
     description="Eclipse Mosquitto MQTT Broker"
 
-ENV VERSION=1.6.3 \
-    DOWNLOAD_SHA256=9ef5cc75f4fe31d7bf50654ddf4728ad9e1ae2e5609a4b42ecbbcb4a209ed17e \
+ENV VERSION=1.6.8 \
+    DOWNLOAD_SHA256=7df23c81ca37f0e070574fe74414403cf25183016433d07add6134366fb45df6 \
     GPG_KEYS=A0D6EEA1DCAE49A635A3B2F0779B22DFB3E717B7 \
     LWS_VERSION=2.4.2
 
@@ -59,7 +59,6 @@ RUN set -x && \
         LDFLAGS="-L/build/lws/lib" \
         WITH_ADNS=no \
         WITH_DOCS=no \
-        WITH_MEMORY_TRACKING=yes \
         WITH_SHARED_LIBRARIES=yes \
         WITH_SRV=no \
         WITH_STRIP=yes \
@@ -79,6 +78,8 @@ RUN set -x && \
     install -s -m755 /build/mosq/src/mosquitto_passwd /usr/bin/mosquitto_passwd && \
     install -m644 /build/mosq/mosquitto.conf /mosquitto/config/mosquitto.conf && \
     chown -R mosquitto:mosquitto /mosquitto && \
+    apk --no-cache add \
+        ca-certificates && \
     apk del build-deps && \
     rm -rf /build
 
@@ -86,5 +87,6 @@ VOLUME ["/mosquitto/data", "/mosquitto/log"]
 
 # Set up the entry point script and default command
 COPY docker-entrypoint.sh /
+EXPOSE 1883
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]

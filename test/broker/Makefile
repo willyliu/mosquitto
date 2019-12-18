@@ -44,11 +44,13 @@ ifeq ($(WITH_TLS),yes)
 else
 	./01-connect-uname-password-success-no-tls.py
 endif
+	./01-connect-zero-length-id.py
 
 
 02 :
 	./02-shared-qos0-v5.py
 	./02-subhier-crash.py
+	./02-subpub-qos0-long-topic.py
 	./02-subpub-qos0-retain-as-publish.py
 	./02-subpub-qos0-send-retain.py
 	./02-subpub-qos0-subscription-id.py
@@ -64,6 +66,7 @@ endif
 	./02-subpub-qos1-nolocal.py
 	./02-subpub-qos1-v5.py
 	./02-subpub-qos1.py
+	./02-subpub-qos2-1322.py
 	./02-subpub-qos2-bad-puback-1.py
 	./02-subpub-qos2-bad-puback-2.py
 	./02-subpub-qos2-bad-pubcomp.py
@@ -74,6 +77,7 @@ endif
 	./02-subpub-qos2.py
 	./02-subscribe-dollar-v5.py
 	./02-subscribe-invalid-utf8.py
+	./02-subscribe-long-topic.py
 	./02-subscribe-persistence-flipflop.py
 	./02-subscribe-qos0.py
 	./02-subscribe-qos1.py
@@ -98,9 +102,11 @@ endif
 	./03-publish-dollar-v5.py
 	./03-publish-dollar.py
 	./03-publish-invalid-utf8.py
+	./03-publish-long-topic.py
 	./03-publish-qos1-no-subscribers-v5.py
 	./03-publish-qos1-retain-disabled.py
 	./03-publish-qos1.py
+	./03-publish-qos2-max-inflight.py
 	./03-publish-qos2.py
 
 04 :
@@ -136,6 +142,8 @@ endif
 07 :
 	./07-will-delay-reconnect.py
 	./07-will-delay-recover.py
+	./07-will-delay-session-expiry.py
+	./07-will-delay-session-expiry2.py
 	./07-will-delay.py
 	./07-will-disconnect-with-will.py
 	./07-will-invalid-utf8.py
@@ -158,6 +166,7 @@ ifeq ($(WITH_TLS),yes)
 	./08-ssl-connect-no-auth-wrong-ca.py
 	./08-ssl-connect-no-auth.py
 	./08-ssl-connect-no-identity.py
+	./08-ssl-hup-disconnect.py
 ifeq ($(WITH_TLS_PSK),yes)
 	./08-tls-psk-pub.py
 	./08-tls-psk-bridge.py

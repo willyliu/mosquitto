@@ -160,13 +160,16 @@ int connect__on_authorised(struct mosquitto_db *db, struct mosquitto *context, v
 			}
 		}
 
+		if(context->clean_start == true){
+			sub__clean_session(db, found_context);
+		}
 		session_expiry__remove(found_context);
 		will_delay__remove(found_context);
 		will__clear(found_context);
 
 		found_context->clean_start = true;
 		found_context->session_expiry_interval = 0;
-		context__set_state(found_context, mosq_cs_duplicate);
+		mosquitto__set_state(found_context, mosq_cs_duplicate);
 		do_disconnect(db, found_context, MOSQ_ERR_SUCCESS);
 	}
 
@@ -266,7 +269,7 @@ int connect__on_authorised(struct mosquitto_db *db, struct mosquitto *context, v
 	}
 	free(auth_data_out);
 
-	context__set_state(context, mosq_cs_connected);
+	mosquitto__set_state(context, mosq_cs_active);
 	rc = send__connack(db, context, connect_ack, CONNACK_ACCEPTED, connack_props);
 	mosquitto_property_free_all(&connack_props);
 	return rc;
@@ -835,7 +838,7 @@ int handle__connect(struct mosquitto_db *db, struct mosquitto *context)
 		if(rc == MOSQ_ERR_SUCCESS){
 			return connect__on_authorised(db, context, auth_data_out, auth_data_out_len);
 		}else if(rc == MOSQ_ERR_AUTH_CONTINUE){
-			context__set_state(context, mosq_cs_authenticating);
+			mosquitto__set_state(context, mosq_cs_authenticating);
 			rc = send__auth(db, context, MQTT_RC_CONTINUE_AUTHENTICATION, auth_data_out, auth_data_out_len);
 			free(auth_data_out);
 			return rc;

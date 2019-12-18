@@ -13,6 +13,8 @@ SRC = \
 	01-server-keepalive-pingreq.c \
 	02-subscribe-qos0.c \
 	02-subscribe-qos1.c \
+	02-subscribe-qos1-async1.c \
+	02-subscribe-qos1-async2.c \
 	02-subscribe-qos2.c \
 	02-unsubscribe.c \
 	02-unsubscribe-v5.c \
@@ -44,6 +46,9 @@ SRC = \
 	08-ssl-fake-cacert.c \
 	09-util-topic-tokenise.c \
 	11-prop-oversize-packet.c \
+	11-prop-recv-qos0.c \
+	11-prop-recv-qos1.c \
+	11-prop-recv-qos2.c \
 	11-prop-send-payload-format.c \
 	11-prop-send-content-type.c
 

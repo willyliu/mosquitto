@@ -61,7 +61,7 @@ int handle__publish(struct mosquitto_db *db, struct mosquitto *context)
 	bool match;
 #endif
 
-	if(context->state != mosq_cs_connected){
+	if(context->state != mosq_cs_active){
 		return MOSQ_ERR_PROTOCOL;
 	}
 
@@ -331,7 +331,6 @@ int handle__publish(struct mosquitto_db *db, struct mosquitto *context)
 			break;
 		case 2:
 			if(dup == 0){
-				util__decrement_receive_quota(context);
 				res = db__message_insert(db, context, mid, mosq_md_in, qos, retain, stored, NULL);
 			}else{
 				res = 0;

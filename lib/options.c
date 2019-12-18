@@ -289,6 +289,7 @@ int mosquitto_string_option(struct mosquitto *mosq, enum mosq_opt_t option, cons
 			}else{
 				return MOSQ_ERR_INVAL;
 			}
+			return MOSQ_ERR_SUCCESS;
 #else
 			return MOSQ_ERR_NOT_SUPPORTED;
 #endif
@@ -322,8 +323,6 @@ int mosquitto_string_option(struct mosquitto *mosq, enum mosq_opt_t option, cons
 		default:
 			return MOSQ_ERR_INVAL;
 	}
-
-	return MOSQ_ERR_INVAL;
 }
 
 
@@ -410,14 +409,22 @@ int mosquitto_int_option(struct mosquitto *mosq, enum mosq_opt_t option, int val
 			if(value < 0 || value > 65535){
 				return MOSQ_ERR_INVAL;
 			}
-			mosq->receive_maximum = value;
+			if(value == 0){
+				mosq->msgs_in.inflight_maximum = 65535;
+			}else{
+				mosq->msgs_in.inflight_maximum = value;
+			}
 			break;
 
 		case MOSQ_OPT_SEND_MAXIMUM:
 			if(value < 0 || value > 65535){
 				return MOSQ_ERR_INVAL;
 			}
-			mosq->send_maximum = value;
+			if(value == 0){
+				mosq->msgs_out.inflight_maximum = 65535;
+			}else{
+				mosq->msgs_out.inflight_maximum = value;
+			}
 			break;
 
 		case MOSQ_OPT_SSL_CTX_WITH_DEFAULTS:

@@ -40,7 +40,6 @@ RUN set -x && \
         LDFLAGS="-L/build/lws/lib" \
         WITH_ADNS=no \
         WITH_DOCS=no \
-        WITH_MEMORY_TRACKING=yes \
         WITH_SHARED_LIBRARIES=yes \
         WITH_SRV=no \
         WITH_STRIP=yes \
@@ -60,6 +59,8 @@ RUN set -x && \
     install -s -m755 /build/mosq/src/mosquitto_passwd /usr/bin/mosquitto_passwd && \
     install -m644 /build/mosq/mosquitto.conf /mosquitto/config/mosquitto.conf && \
     chown -R mosquitto:mosquitto /mosquitto && \
+    apk --no-cache add \
+        ca-certificates && \
     apk del build-deps && \
     rm -rf /build
 
@@ -67,5 +68,6 @@ VOLUME ["/mosquitto/data", "/mosquitto/log"]
 
 # Set up the entry point script and default command
 COPY docker-entrypoint.sh /
+EXPOSE 1883
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
