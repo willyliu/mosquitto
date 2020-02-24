@@ -52,11 +52,11 @@ configure_make()
    mkdir -p "${PREFIX_DIR}"
 
     if [[ "${ARCH}" == "x86_64" ]]; then
-        cmake -DCMAKE_TOOLCHAIN_FILE=ios.cmake -DIOS_DEPLOYMENT_TARGET=8.0 -DIOS_PLATFORM=SIMULATOR64 -DOPENSSL_INCLUDE_DIR=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/include/ -DOPENSSL_SSL_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libssl.a -DOPENSSL_CRYPTO_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libcrypto.a -DWITH_STATIC_LIBRARIES=ON -DCMAKE_INSTALL_PREFIX:PATH=${PREFIX_DIR} ..   
+        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=ios.cmake -DIOS_DEPLOYMENT_TARGET=8.0 -DIOS_PLATFORM=SIMULATOR64 -DOPENSSL_INCLUDE_DIR=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/include/ -DOPENSSL_SSL_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libssl.a -DOPENSSL_CRYPTO_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libcrypto.a -DWITH_STATIC_LIBRARIES=ON -DCMAKE_INSTALL_PREFIX:PATH=${PREFIX_DIR} ..   
     elif [[ "${ARCH}" == "i386" ]]; then
-        cmake -DCMAKE_TOOLCHAIN_FILE=ios.cmake -DIOS_DEPLOYMENT_TARGET=8.0 -DIOS_PLATFORM=SIMULATOR -DOPENSSL_INCLUDE_DIR=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/include/ -DOPENSSL_SSL_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libssl.a -DOPENSSL_CRYPTO_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libcrypto.a -DWITH_STATIC_LIBRARIES=ON -DCMAKE_INSTALL_PREFIX:PATH=${PREFIX_DIR} ..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=ios.cmake -DIOS_DEPLOYMENT_TARGET=8.0 -DIOS_PLATFORM=SIMULATOR -DOPENSSL_INCLUDE_DIR=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/include/ -DOPENSSL_SSL_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libssl.a -DOPENSSL_CRYPTO_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libcrypto.a -DWITH_STATIC_LIBRARIES=ON -DCMAKE_INSTALL_PREFIX:PATH=${PREFIX_DIR} ..
     else
-        cmake -DCMAKE_TOOLCHAIN_FILE=ios.cmake -DIOS_DEPLOYMENT_TARGET=8.0 -DOPENSSL_INCLUDE_DIR=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/include/ -DOPENSSL_SSL_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libssl.a -DOPENSSL_CRYPTO_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libcrypto.a -DWITH_STATIC_LIBRARIES=ON -DCMAKE_C_FLAGS=-fembed-bitcode -DCMAKE_INSTALL_PREFIX:PATH=${PREFIX_DIR} ..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=ios.cmake -DIOS_DEPLOYMENT_TARGET=8.0 -DOPENSSL_INCLUDE_DIR=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/include/ -DOPENSSL_SSL_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libssl.a -DOPENSSL_CRYPTO_LIBRARY=/Users/willyliu/Documents/projects/kklinx_client_sdk/SDK/src/lib/openssl/ios/lib/libcrypto.a -DWITH_STATIC_LIBRARIES=ON -DCMAKE_C_FLAGS=-fembed-bitcode -DCMAKE_INSTALL_PREFIX:PATH=${PREFIX_DIR} ..
     fi
    
    make clean
@@ -83,5 +83,5 @@ create_lib()
    lipo ${LIB_PATHS[@]} -create -output "${LIB_DST}"
 }
 mkdir -p "${LIB_DEST_DIR}";
-create_lib "libmosquitto.a" "${LIB_DEST_DIR}/libmosquitto.a"
+create_lib "libmosquitto_static.a" "${LIB_DEST_DIR}/libmosquitto.a"
 lipo -info "${LIB_DEST_DIR}/libmosquitto.a"
