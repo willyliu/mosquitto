@@ -502,6 +502,14 @@ int net__socket_connect_tls(struct mosquitto *mosq)
 		err = SSL_get_error(mosq->ssl, ret);
 		if (err == SSL_ERROR_SYSCALL) {
 			mosq->want_connect = true;
+			// for fixing #378280, sometimes we will get lots of SSL_ERROR_SYSCALL consecutively, so sleep some time for lowering cpu usage
+			struct timespec req, rem;
+			req.tv_sec = 0;
+			const int kNanoSecondsPerMilliSecond = 1000000;
+			req.tv_nsec = kNanoSecondsPerMilliSecond * 100;	// equals 100 ms
+			while(nanosleep(&req, &rem) == -1 && errno == EINTR){
+				req = rem;
+			}
 			return MOSQ_ERR_SUCCESS;
 		}
 		if(err == SSL_ERROR_WANT_READ){

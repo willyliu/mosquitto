@@ -151,6 +151,7 @@ int mosquitto_loop(struct mosquitto *mosq, int timeout, int max_packets)
 				rc = mosquitto_loop_read(mosq, max_packets);
 				// sleep some time on tight retry
 				// if retry doesn't work, then return connection lost error
+				// XXX: is this needed?
 				static int read_error_count = 0;
 				static int sleep_count = 0;
 				if(errno == EAGAIN || errno == COMPAT_EWOULDBLOCK) {
@@ -199,36 +200,6 @@ int mosquitto_loop(struct mosquitto *mosq, int timeout, int max_packets)
 #ifdef WITH_TLS
 				if(mosq->want_connect){
 					rc = net__socket_connect_tls(mosq);
-
-					// sleep some time on tight retry
-					// if retry doesn't work, then return connection lost error
-					static int connect_error_count = 0;
-					static int connect_sleep_count = 0;
-					if(errno == EAGAIN || errno == COMPAT_EWOULDBLOCK) {
-						connect_error_count++;
-					}
-					else if (!rc) {
-						connect_error_count = 0;
-						connect_sleep_count = 0;
-					}
-					const int CONNECT_READ_ERROR_LIMIT = 10000;
-					if (connect_error_count > CONNECT_READ_ERROR_LIMIT) {
-						connect_error_count = 0;
-						connect_sleep_count++;
-						struct timespec req, rem;
-						req.tv_sec = 0;
-						req.tv_nsec = 100000000;	// equals 0.1 seconds
-						while(nanosleep(&req, &rem) == -1 && errno == EINTR){
-							req = rem;
-						}
-					}
-					const int CONNECT_SLEEP_LIMIT = 50;	// 0.1 seconds * 50 = 5 secs
-					if (connect_sleep_count > CONNECT_SLEEP_LIMIT) {
-						connect_error_count = 0;
-						connect_sleep_count = 0;
-						return MOSQ_ERR_CONN_LOST;
-					}
-
 					if(rc) return rc;
 				}else
 #endif
