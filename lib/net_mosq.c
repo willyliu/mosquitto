@@ -506,7 +506,7 @@ int net__socket_connect_tls(struct mosquitto *mosq)
 			struct timespec req, rem;
 			req.tv_sec = 0;
 			const int kNanoSecondsPerMilliSecond = 1000000;
-			req.tv_nsec = kNanoSecondsPerMilliSecond * 100;	// equals 100 ms
+			req.tv_nsec = kNanoSecondsPerMilliSecond * 16;	// equals 16 ms
 			while(nanosleep(&req, &rem) == -1 && errno == EINTR){
 				req = rem;
 			}
